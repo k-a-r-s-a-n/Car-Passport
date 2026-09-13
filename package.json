@@ -1,0 +1,38 @@
+{
+  "name": "carpassport",
+  "version": "1.0.0",
+  "description": "CarPassport — public Layer-2 DApp that binds a VIN to an append-only service ledger with on-chain odometer monotonicity.",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "build": "hardhat compile",
+    "lint": "node --check server.js frontend/app.js frontend/config.js frontend/abi.js frontend/amoy-deployment.js frontend/splash.js frontend/animations.js hardhat.config.js",
+    "start": "node server.js",
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "deploy:localhost": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:amoy": "hardhat run scripts/deploy.js --network amoy",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
+    "demo": "npx hardhat run scripts/demo-flow.js",
+    "frontend": "npx --yes serve frontend -p 5173"
+  },
+  "keywords": [
+    "blockchain",
+    "solidity",
+    "polygon",
+    "vehicle-history",
+    "odometer"
+  ],
+  "author": "Karwin S.C (25BCE1682), Kevin Fernando (25BCE1981)",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^16.4.7",
+    "hardhat": "^2.22.18"
+  }
+}

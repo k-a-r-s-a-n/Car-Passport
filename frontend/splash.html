@@ -1,0 +1,35 @@
+<!-- CarPassport Standalone Splash Overlay Partial -->
+<!-- This file can be used as a standalone partial or disabled entirely -->
+<div id="splash-screen" class="splash-overlay" aria-hidden="true">
+  <!-- Top Terminal Metadata Bar -->
+  <div class="splash-topbar">
+    <div class="splash-meta-tag">[SYS] CARPASSPORT // L2-CORE</div>
+    <div class="splash-meta-node">CHAIN: POLYGON AMOY [80002]</div>
+    <div class="splash-meta-status">STATUS: ONLINE</div>
+  </div>
+
+  <!-- Center Content: Display Wordmark + Terminal Tagline -->
+  <div class="splash-center">
+    <div class="splash-badge">BLOCKCHAIN VEHICLE PASSPORT PROTOCOL</div>
+    <h1 class="splash-wordmark" id="splash-wordmark" aria-label="CarPassport">
+      <!-- Letters injected dynamically for mechanical character reveal or fallback text -->
+      <span class="splash-char-slot"><span class="splash-char">C</span></span><span class="splash-char-slot"><span class="splash-char">a</span></span><span class="splash-char-slot"><span class="splash-char">r</span></span><span class="splash-char-slot"><span class="splash-char">P</span></span><span class="splash-char-slot"><span class="splash-char">a</span></span><span class="splash-char-slot"><span class="splash-char">s</span></span><span class="splash-char-slot"><span class="splash-char">s</span></span><span class="splash-char-slot"><span class="splash-char">p</span></span><span class="splash-char-slot"><span class="splash-char">o</span></span><span class="splash-char-slot"><span class="splash-char">r</span></span><span class="splash-char-slot"><span class="splash-char">t</span></span>
+    </h1>
+
+    <div class="splash-tagline" id="splash-tagline">
+      <span class="splash-prompt">&gt;</span> <span id="splash-status-text">VERIFYING CHAIN STATE...</span><span class="splash-cursor">▋</span>
+    </div>
+  </div>
+
+  <!-- Bottom-Aligned Progress Indicator -->
+  <div class="splash-footer">
+    <div class="splash-progress-header">
+      <span class="splash-progress-label">INITIALIZING LEDGER ENGINE</span>
+      <span class="splash-progress-pct" id="splash-progress-pct">0%</span>
+    </div>
+    <div class="splash-progress-track">
+      <div class="splash-progress-bar" id="splash-progress-bar"></div>
+    </div>
+    <div class="splash-hash-stream" id="splash-hash-stream">0x73a8f190bc98e...keccak256(vin_passport_registry)</div>
+  </div>
+</div>

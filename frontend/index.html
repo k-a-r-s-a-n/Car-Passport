@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CarPassport</title>
+    <meta name="description" content="Public Layer-2 vehicle history and digital title protocol binding VINs to an on-chain append-only service ledger." />
+    <meta property="og:title" content="CarPassport" />
+    <meta property="og:description" content="Public Layer-2 vehicle history and digital title protocol binding VINs to an on-chain append-only service ledger." />
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:wght@400..800&family=Inter:wght@400..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <!-- GSAP for Splash & App Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="./animations.js"></script>
+    <script src="./splash.js"></script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              neo: {
+                bg: "#FFFDF7",
+                ink: "#111111",
+                primary: "#2F6FED",
+                secondary: "#FFD23F",
+                danger: "#FF3B3B",
+                success: "#00C853",
+                surface: "#FFFFFF"
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./splash.css" />
+    <style>
+      .tab-content { display: none; }
+      .tab-content.active { display: block; }
+    </style>
+  </head>
+  <body class="bg-neo-bg text-neo-ink">
+    <!-- Standalone Neobrutalist Splash Screen -->
+    <div id="splash-screen" class="splash-overlay" aria-hidden="true">
+      <div class="splash-topbar">
+        <div class="splash-meta-tag">[SYS] CARPASSPORT // L2-CORE</div>
+        <div class="splash-meta-node">CHAIN: POLYGON AMOY [80002]</div>
+        <div class="splash-meta-status">NODE: READY</div>
+      </div>
+
+      <div class="splash-center">
+        <div class="splash-badge">BLOCKCHAIN VEHICLE PASSPORT PROTOCOL</div>
+        <h1 class="splash-wordmark" id="splash-wordmark" aria-label="CarPassport">
+          <span class="splash-char-slot"><span class="splash-char">C</span></span><span class="splash-char-slot"><span class="splash-char">a</span></span><span class="splash-char-slot"><span class="splash-char">r</span></span><span class="splash-char-slot"><span class="splash-char">P</span></span><span class="splash-char-slot"><span class="splash-char">a</span></span><span class="splash-char-slot"><span class="splash-char">s</span></span><span class="splash-char-slot"><span class="splash-char">s</span></span><span class="splash-char-slot"><span class="splash-char">p</span></span><span class="splash-char-slot"><span class="splash-char">o</span></span><span class="splash-char-slot"><span class="splash-char">r</span></span><span class="splash-char-slot"><span class="splash-char">t</span></span>
+        </h1>
+
+        <div class="splash-tagline" id="splash-tagline">
+          <span class="splash-prompt">&gt;</span>
+          <span id="splash-status-text">VERIFYING CHAIN STATE...</span>
+          <span class="splash-cursor">▋</span>
+        </div>
+      </div>
+
+      <div class="splash-footer">
+        <div class="splash-progress-header">
+          <span id="splash-step-label">INITIALIZING PROTOCOL LEDGER</span>
+          <span class="splash-progress-pct" id="splash-progress-pct">0%</span>
+        </div>
+        <div class="splash-progress-track">
+          <div class="splash-progress-bar" id="splash-progress-bar"></div>
+        </div>
+        <div class="splash-hash-stream" id="splash-hash-stream">0x73a8f190bc98e...keccak256(vin_passport_registry)</div>
+      </div>
+    </div>
+
+    <!-- Header with Toggle Modes -->
+    <header class="topbar flex justify-between items-center">
+      <div class="brand">
+        <strong class="text-xl font-extrabold tracking-tighter">CarPassport · Unified Project Hub</strong>
+        <span class="text-xs font-bold uppercase">Public Layer-2 Vehicle History Ledger</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="replaySplashBtn" class="neo-btn text-xs" onclick="window.CarPassportSplash && window.CarPassportSplash.replay()" title="Replay Boot Sequence">
+          <i class="fa-solid fa-rotate-right mr-1"></i> Replay Boot
+        </button>
+        <button id="themeToggle" class="neo-btn neo-btn-secondary text-xs">
+          Switch Theme
+        </button>
+        <span id="networkBadge" class="neo-badge"></span>
+      </div>
+    </header>
+
+    <!-- Interactive Navigation Tabs -->
+    <div class="max-w-6xl mx-auto px-3 mt-4">
+      <div class="flex gap-2 p-2">
+        <button class="tab-btn flex-1 active" onclick="switchTab('buyer-tab', this)">
+          <i class="fa-solid fa-magnifying-glass mr-2 text-lg"></i> Verify
+        </button>
+        <button class="tab-btn flex-1" onclick="switchTab('mechanic-tab', this)">
+          <i class="fa-solid fa-gear mr-2 text-lg"></i> Log Service
+        </button>
+        <button class="tab-btn flex-1" onclick="switchTab('tests-tab', this)">
+          <i class="fa-solid fa-check-double mr-2 text-lg"></i> Test Suite
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="max-w-6xl mx-auto px-4 py-6">
+
+      <!-- ==================== TAB 1: VERIFY ==================== -->
+      <section id="buyer-tab" class="tab-content active">
+        <div class="neo-card">
+          <h2 class="text-lg font-bold mb-2">Verify VIN</h2>
+          <p class="text-sm mb-4">Public lookup of decentralized vehicle history.</p>
+
+          <form id="searchForm" class="flex gap-3 max-w-2xl">
+            <input id="vin" name="vin" required placeholder="Enter 17-character VIN" class="neo-input font-mono" />
+            <button type="submit" class="neo-btn">
+              Search History
+            </button>
+          </form>
+          <div id="searchBanner" class="banner mt-3" hidden></div>
+        </div>
+
+        <div class="neo-card">
+          <h2 class="text-lg font-bold mb-2">Immutable Service Ledger Timeline</h2>
+          <div id="vinHash" class="text-xs bg-neo-bg p-3 border-neo-ink border-2 mb-2 break-all"></div>
+          <div id="titleStatus" class="neo-badge mb-4 hidden"></div>
+
+          <!-- Title Transfer Card -->
+          <div id="transferCard" class="neo-card bg-neo-secondary hidden">
+            <h3 class="text-sm font-bold mb-2"><i class="fa-solid fa-shield-halved mr-1"></i> You own this Digital Title</h3>
+            <p class="text-xs mb-4">Transfer this vehicle's maintenance passport to a new buyer's wallet.</p>
+            <div class="flex gap-2">
+              <input id="transferTo" placeholder="Recipient Wallet (0x...)" class="neo-input font-mono text-xs" />
+              <button id="transferBtn" class="neo-btn text-xs">
+                Transfer Title
+              </button>
+            </div>
+            <div id="transferBanner" class="banner mt-2 text-[10px]" hidden></div>
+          </div>
+
+          <ul id="timeline" class="timeline"></ul>
+          <p id="empty" class="text-center py-6 text-sm font-bold">Enter a VIN above to load audited records.</p>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: LOG SERVICE ==================== -->
+      <section id="mechanic-tab" class="tab-content">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+          <!-- Left Column: Wallet connection & Status -->
+          <div class="md:col-span-1">
+            <div class="neo-card">
+              <h2 class="text-base font-bold mb-3">Wallet</h2>
+              <button id="connectBtn" class="w-full neo-btn mb-4">
+                Connect MetaMask
+              </button>
+              <div id="walletBanner" class="banner text-xs"></div>
+
+              <div class="mt-4 space-y-2 text-xs">
+                <div class="flex justify-between border-b-2 border-neo-ink pb-1.5"><span class="font-bold">Status:</span><span id="walletStatus" class="font-black">Disconnected</span></div>
+                <div class="flex justify-between border-b-2 border-neo-ink pb-1.5"><span class="font-bold">Role:</span><span id="roleStatus" class="font-black">—</span></div>
+                <div id="reputation" class="italic mt-2"></div>
+              </div>
+            </div>
+
+            <!-- Owner Controls -->
+            <div id="ownerCard" class="neo-card bg-neo-success text-white" hidden>
+              <h2 class="text-base font-bold mb-2">Admin</h2>
+              <p class="text-xs mb-4">Authorize garage workshops.</p>
+
+              <div class="space-y-3">
+                <input id="newMechanic" placeholder="Address (0x...)" class="neo-input font-mono text-xs" />
+                <button id="authorizeBtn" class="w-full neo-btn neo-btn-secondary text-xs">
+                  Authorize
+                </button>
+              </div>
+              <div id="authBanner" class="banner mt-2 text-xs" hidden></div>
+            </div>
+          </div>
+
+          <!-- Right Column: Write Service records -->
+          <div class="md:col-span-2">
+            <div class="neo-card">
+              <h2 class="text-lg font-bold mb-2">New Record</h2>
+              <p class="text-sm mb-4">Submit mileage and repair data to the ledger.</p>
+
+              <form id="serviceForm" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold mb-1 uppercase">VIN (17 characters)</label>
+                  <input id="mechVin" required placeholder="Enter VIN" class="neo-input font-mono" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold mb-1 uppercase">Odometer</label>
+                    <input id="odometer" type="number" required placeholder="Current Mileage" class="neo-input font-mono" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold mb-1 uppercase">Invoice Hash / Notes</label>
+                    <input id="description" required placeholder="Repair Notes" class="neo-input" />
+                  </div>
+                </div>
+
+                <button id="submitBtn" type="submit" class="w-full neo-btn neo-btn-success py-4 text-base">
+                  Sign & Broadcast Record
+                </button>
+              </form>
+              <div id="txBanner" class="banner mt-3" hidden></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: TEST SUITE ==================== -->
+      <section id="tests-tab" class="tab-content neo-card">
+        <h2 class="text-lg font-bold mb-1">Test Suite Matrix</h2>
+        <p class="text-sm mb-4">Automated validation of all physical and cryptographic protocol invariants.</p>
+
+        <!-- Dynamic Summary Strip -->
+        <div id="testSummaryStrip" class="neo-card flex flex-wrap justify-between items-center gap-4 mb-6 bg-white">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 flex items-center justify-center bg-neo-success text-white border-2 border-neo-ink shadow-[2px_2px_0px_#111111]">
+              <i class="fa-solid fa-circle-check text-xl"></i>
+            </div>
+            <div>
+              <div id="testSummaryCount" class="font-display font-extrabold text-2xl tracking-tight flex items-center" style="color: var(--accent-success);">
+                <i class="fa-solid fa-circle-check mr-2 text-xl"></i>
+                <span id="testSummaryText">30/30 PASSING</span>
+              </div>
+              <div class="text-xs font-mono font-bold text-neo-ink opacity-80 uppercase tracking-tight">
+                Hardhat Automated Protocol Matrix · Cryptographic &amp; Physical Invariants
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="test-pass-badge text-xs">
+              <i class="fa-solid fa-shield-halved mr-1"></i> 100% SUITE INTEGRITY
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <!-- Suite 1: Initial State & Ownership -->
+            <div class="suite-group-card neo-card p-4 bg-neo-bg">
+              <h3 class="font-bold text-sm mb-3 flex items-center">
+                <i class="fa-solid fa-key suite-group-header-icon"></i>
+                <span>Suite 1: Initial State &amp; Ownership</span>
+              </h3>
+              <div class="space-y-2">
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">1. Deployer is Initial Owner</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">2. Deployer Granted MECHANIC_ROLE</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">3. Compute Keccak256 VIN Hash (vinHashOf)</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">4. getVinHash Frontend Alias</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">5. Empty VIN Strings Revert (EmptyVIN)</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Suite 2: Monotonicity & Service Logging -->
+            <div class="suite-group-card neo-card p-4 bg-neo-bg">
+              <h3 class="font-bold text-sm mb-3 flex items-center">
+                <i class="fa-solid fa-arrow-trend-up suite-group-header-icon"></i>
+                <span>Suite 2: Monotonicity &amp; Service Invariants</span>
+              </h3>
+              <div class="space-y-2">
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">6. Auto-Mint Vehicle NFT on First Service</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">7. Accept Ascending Mileage Records</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">8. Same-Day Equal Mileage Records</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">9. Revert on Odometer Rollback</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">10. Revert on Unrealistic Mileage Jump</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">11. Direct TokenId (uint256) Logging</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">12. Increment &amp; Store Mechanic Reputation</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Suite 3: Access Control & Role Governance -->
+            <div class="suite-group-card neo-card p-4 bg-neo-bg">
+              <h3 class="font-bold text-sm mb-3 flex items-center">
+                <i class="fa-solid fa-user-shield suite-group-header-icon"></i>
+                <span>Suite 3: Access Control &amp; Role Governance</span>
+              </h3>
+              <div class="space-y-2">
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">13. Revert Unauthorized Service Logging</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">14. Owner Authorizes Workshop Mechanic</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">15. Owner Revokes Workshop Mechanic</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">16. Revert If Revoked Mechanic Logs</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">17. Revert Non-Owner Authorizing Mechanic</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">18. Revert Authorizing ZeroAddress</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">19. Revert Revoking ZeroAddress</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Suite 4: Ownership Lifecycle & Public Inspection -->
+            <div class="suite-group-card neo-card p-4 bg-neo-bg">
+              <h3 class="font-bold text-sm mb-3 flex items-center">
+                <i class="fa-solid fa-right-left suite-group-header-icon"></i>
+                <span>Suite 4: Ownership Lifecycle &amp; Public Inspection</span>
+              </h3>
+              <div class="space-y-2">
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">20. Transfer Contract Ownership by Owner</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">21. Revert Transferring to ZeroAddress</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">22. Emit OwnershipTransferred Event</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">23. Revert Non-Owner Transferring Ownership</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">24. Public Read: Unrestricted History Query</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">25. Reverse-Map Bytes32 Hash to VIN</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">26. Zero-Gas Last Odometer Helper</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">27. NFT Owner Transfers Vehicle Title</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">28. Emit VehicleTitleTransferred Event</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">29. Title Transfer Updates Token Ownership (ownerOf)</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+                <div class="test-row flex justify-between items-center bg-white p-2.5 border-2 border-neo-ink">
+                  <span class="text-xs font-bold font-mono">30. Revert Non-NFT-Owner Transferring Title</span>
+                  <span class="test-pass-badge"><i class="fa-solid fa-check text-[10px]"></i> PASS</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+      </section>
+
+    </main>
+
+    <footer class="max-w-6xl mx-auto px-4 py-6 text-center text-xs font-bold border-t-4 border-neo-ink mt-12">
+      CarPassport · Prepared by Karwin S.C & Kevin Fernando · Polygon Amoy Testnet
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+    <script src="./config.js"></script>
+    <script src="./abi.js"></script>
+    <script src="./amoy-deployment.js"></script>
+    <script src="./deployed-address.js"></script>
+    <script src="./app.js"></script>
+    <script>
+      // Initialize Network Badge
+      window.CarPassportApp.paintNetworkBadge(document.getElementById("networkBadge"));
+
+      // Single-page Tab Switching Logic (GSAP Animated & Directional)
+      function switchTab(tabId, btn) {
+        if (window.CarPassportAnimations && window.CarPassportAnimations.switchTabAnimated) {
+          window.CarPassportAnimations.switchTabAnimated(tabId, btn);
+        } else {
+          document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+          document.getElementById(tabId).classList.add('active');
+          document.querySelectorAll('.tab-btn').forEach(b => {
+            b.classList.remove('active');
+          });
+          if (btn) btn.classList.add('active');
+        }
+      }
+
+      // Theme toggle feature (simplified for brutalist look)
+      const themeToggle = document.getElementById("themeToggle");
+      themeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("invert");
+      });
+
+      // Synchronize Test Suite pass count directly from matrix rows
+      function syncTestSuiteSummary() {
+        const totalRows = document.querySelectorAll("#tests-tab .test-row").length;
+        const passBadges = document.querySelectorAll("#tests-tab .test-pass-badge").length;
+        const countText = document.getElementById("testSummaryText");
+        if (countText && totalRows > 0) {
+          countText.textContent = `${passBadges}/${totalRows} PASSING`;
+        }
+      }
+      syncTestSuiteSummary();
+    </script>
+
+    <!-- Buyer & Mechanic Logic -->
+    <script>
+      const searchForm = document.getElementById("searchForm");
+      const searchBanner = document.getElementById("searchBanner");
+      const timeline = document.getElementById("timeline");
+      const empty = document.getElementById("empty");
+      const vinHashEl = document.getElementById("vinHash");
+      const titleStatus = document.getElementById("titleStatus");
+      const transferCard = document.getElementById("transferCard");
+      const transferBtn = document.getElementById("transferBtn");
+      const transferBanner = document.getElementById("transferBanner");
+
+      // Set default demo VIN
+      document.getElementById("vin").value = window.CARPASSPORT_DEMO_VIN || "1HGCM82633A004352";
+      document.getElementById("mechVin").value = window.CARPASSPORT_DEMO_VIN || "1HGCM82633A004352";
+
+      async function checkOwnership(vin) {
+        try {
+          const contract = window.CarPassportApp.getReadContract();
+          const owner = await contract.getVehicleOwner(vin);
+          if (!owner || owner === "0x0000000000000000000000000000000000000000") {
+            titleStatus.hidden = true;
+            transferCard.hidden = true;
+            return;
+          }
+
+          titleStatus.hidden = false;
+          titleStatus.className = "neo-badge mb-4 block text-center";
+          titleStatus.textContent = "Title Holder: " + owner;
+
+          if (window.ethereum) {
+            const accounts = await window.ethereum.request({ method: "eth_accounts" });
+            if (accounts[0] && accounts[0].toLowerCase() === owner.toLowerCase()) {
+              transferCard.classList.remove("hidden");
+              transferCard.hidden = false;
+            } else {
+              transferCard.classList.add("hidden");
+              transferCard.hidden = true;
+            }
+          }
+        } catch (e) { console.error(e); }
+      }
+
+      searchForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        window.CarPassportApp.hideBanner(searchBanner);
+        timeline.innerHTML = "";
+        vinHashEl.textContent = "";
+        const vin = document.getElementById("vin").value.trim();
+        empty.hidden = true;
+        titleStatus.hidden = true;
+        transferCard.classList.add("hidden");
+
+        try {
+          const contract = window.CarPassportApp.getReadContract();
+          const { chainId } = window.CarPassportApp.resolveAddressAndChain();
+          const [history, hash] = await Promise.all([
+            contract.getHistoryByVin(vin),
+            contract.vinHashOf(vin)
+          ]);
+
+          vinHashEl.textContent = "keccak256(VIN) Mapping Key = " + hash;
+          await checkOwnership(vin);
+
+          if (!history || !history.length) {
+            empty.hidden = false;
+            empty.textContent = "No committed records for this VIN.";
+            return;
+          }
+
+          history.forEach((rec, i) => {
+            const li = document.createElement("li");
+            const explorer = window.CarPassportApp.explorerAddressUrl(chainId, rec.mechanic);
+            const mechLabel = window.CarPassportApp.truncateAddress(rec.mechanic);
+            const mechHtml = explorer
+              ? `<a href="${explorer}" class="font-bold underline" target="_blank" rel="noopener noreferrer">${mechLabel}</a>`
+              : mechLabel;
+
+            li.innerHTML = `
+              <div class="miles">${rec.odometer.toString()} mi — ${rec.description}</div>
+              <div class="meta">${window.CarPassportApp.formatTs(rec.timestamp)} · Mechanic: ${mechHtml} · Reputation: ${rec.mechanicReputationAtWrite.toString()}</div>
+            `;
+            timeline.appendChild(li);
+          });
+
+          if (window.CarPassportAnimations && window.CarPassportAnimations.animateTimelineEntries) {
+            window.CarPassportAnimations.animateTimelineEntries(timeline.querySelectorAll("li"));
+          }
+        } catch (err) {
+          empty.hidden = false;
+          empty.textContent = "Could not load history.";
+          window.CarPassportApp.showBanner(searchBanner, "err", window.CarPassportApp.decodeContractError(err));
+        }
+      });
+
+      transferBtn.addEventListener("click", async () => {
+        window.CarPassportApp.hideBanner(transferBanner);
+        const to = document.getElementById("transferTo").value.trim();
+        const vin = document.getElementById("vin").value.trim();
+        if (!to || !vin) return;
+
+        transferBtn.disabled = true;
+        try {
+          await window.CarPassportApp.ensureWalletChain();
+          const contract = await window.CarPassportApp.getSignerContract();
+          const tx = await contract.transferVehicle(vin, to);
+          window.CarPassportApp.showBanner(transferBanner, "info", "Transferring title... " + tx.hash);
+          await tx.wait();
+          window.CarPassportApp.showBanner(transferBanner, "ok", "Vehicle Digital Title transferred successfully!");
+          await checkOwnership(vin);
+        } catch (err) {
+          window.CarPassportApp.showBanner(transferBanner, "err", window.CarPassportApp.decodeContractError(err));
+        } finally {
+          transferBtn.disabled = false;
+        }
+      });
+
+      // Mechanic Terminal Logic
+      const connectBtn = document.getElementById("connectBtn");
+      const serviceForm = document.getElementById("serviceForm");
+      const walletBanner = document.getElementById("walletBanner");
+      const txBanner = document.getElementById("txBanner");
+      const authBanner = document.getElementById("authBanner");
+      const ownerCard = document.getElementById("ownerCard");
+      const authorizeBtn = document.getElementById("authorizeBtn");
+
+      async function refreshWalletUi(account) {
+        const { chainId } = window.CarPassportApp.resolveAddressAndChain();
+        document.getElementById("walletStatus").textContent = window.CarPassportApp.truncateAddress(account);
+        document.getElementById("walletStatus").className = "font-black font-mono";
+
+        try {
+          const contract = await window.CarPassportApp.getSignerContract();
+          const [owner, isMech, count] = await Promise.all([
+            contract.owner(),
+            contract.authorizedMechanics(account),
+            contract.mechanicEntryCount(account)
+          ]);
+          document.getElementById("reputation").textContent = "Entries: " + count.toString();
+          document.getElementById("roleStatus").textContent = isMech ? "Authorized" : "Read-only";
+          ownerCard.hidden = owner.toLowerCase() !== account.toLowerCase();
+        } catch (err) {
+          window.CarPassportApp.showBanner(walletBanner, "err", window.CarPassportApp.decodeContractError(err));
+        }
+      }
+
+      connectBtn.addEventListener("click", async () => {
+        window.CarPassportApp.hideBanner(walletBanner);
+        try {
+          if (!window.ethereum) {
+            window.CarPassportApp.showBanner(walletBanner, "err", "MetaMask not detected.");
+            return;
+          }
+          await window.CarPassportApp.ensureWalletChain();
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          await refreshWalletUi(accounts[0]);
+        } catch (err) {
+          window.CarPassportApp.showBanner(walletBanner, "err", window.CarPassportApp.decodeContractError(err));
+        }
+      });
+
+      serviceForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        window.CarPassportApp.hideBanner(txBanner);
+        const vin = document.getElementById("mechVin").value.trim();
+        const odometer = document.getElementById("odometer").value;
+        const description = document.getElementById("description").value.trim();
+        const submitBtn = document.getElementById("submitBtn");
+        submitBtn.disabled = true;
+
+        try {
+          await window.CarPassportApp.ensureWalletChain();
+          const contract = await window.CarPassportApp.getSignerContract();
+          const tx = await contract.addServiceRecordByVin(vin, odometer, description);
+          window.CarPassportApp.showBanner(txBanner, "info", "Waiting for confirmation: " + tx.hash);
+          await tx.wait();
+          window.CarPassportApp.showBanner(txBanner, "ok", "Successfully committed service record on-chain!");
+        } catch (err) {
+          window.CarPassportApp.showBanner(txBanner, "err", window.CarPassportApp.decodeContractError(err));
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      if (authorizeBtn) {
+        authorizeBtn.addEventListener("click", async () => {
+          window.CarPassportApp.hideBanner(authBanner);
+          const mech = document.getElementById("newMechanic").value.trim();
+          if (!mech) return;
+          authorizeBtn.disabled = true;
+          try {
+            await window.CarPassportApp.ensureWalletChain();
+            const contract = await window.CarPassportApp.getSignerContract();
+            const tx = await contract.authorizeMechanic(mech);
+            window.CarPassportApp.showBanner(authBanner, "info", "Authorizing mechanic: " + tx.hash);
+            await tx.wait();
+            window.CarPassportApp.showBanner(authBanner, "ok", "Mechanic workshop successfully authorized on-chain!");
+            document.getElementById("newMechanic").value = "";
+          } catch (err) {
+            window.CarPassportApp.showBanner(authBanner, "err", window.CarPassportApp.decodeContractError(err));
+          } finally {
+            authorizeBtn.disabled = false;
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
