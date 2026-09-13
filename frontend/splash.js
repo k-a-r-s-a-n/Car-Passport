@@ -51,10 +51,41 @@
     }
   }
 
+  // Helper to get current network display info
+  function getNetworkInfo() {
+    const cfg = window.CARPASSPORT_CONFIG;
+    const deployedChainId = window.CARPASSPORT_DEPLOYED_CHAIN_ID;
+
+    // Default to Amoy if nothing else found
+    let name = "POLYGON AMOY";
+    let id = "80002";
+
+    if (deployedChainId && cfg) {
+      if (deployedChainId === 11155111) {
+        name = "ETHEREUM SEPOLIA";
+        id = "11155111";
+      } else if (deployedChainId === 80002) {
+        name = "POLYGON AMOY";
+        id = "80002";
+      } else if (deployedChainId === 31337) {
+        name = "LOCAL HOST";
+        id = "31337";
+      }
+    }
+    return { name, id };
+  }
+
   // Ensure HTML structure exists
   function ensureSplashMarkup() {
+    const { name, id } = getNetworkInfo();
     let splash = document.getElementById("splash-screen");
-    if (splash) return splash;
+
+    // If it exists in index.html, update its text
+    if (splash) {
+      const nodeTag = splash.querySelector(".splash-meta-node");
+      if (nodeTag) nodeTag.textContent = `CHAIN: ${name} [${id}]`;
+      return splash;
+    }
 
     const overlay = document.createElement("div");
     overlay.id = "splash-screen";
@@ -64,7 +95,7 @@
     overlay.innerHTML = `
       <div class="splash-topbar">
         <div class="splash-meta-tag">[SYS] CARPASSPORT // L2-CORE</div>
-        <div class="splash-meta-node">CHAIN: POLYGON AMOY [80002]</div>
+        <div class="splash-meta-node">CHAIN: ${name} [${id}]</div>
         <div class="splash-meta-status">NODE: READY</div>
       </div>
 
@@ -189,6 +220,8 @@
       // 4. Progress tween: fills left-to-right with --accent-primary
       // Fixed timed fill: ~1.35 seconds total, perfectly within 1.2–1.8s requirement
       const progressObj = { value: 0 };
+      const { name } = getNetworkInfo();
+
       tl.to(
         progressObj,
         {
@@ -203,7 +236,7 @@
             // Update terminal state messages during progress
             if (current >= 30 && current < 65) {
               if (statusText) statusText.textContent = "VERIFYING CHAIN STATE...";
-              if (stepLabel) stepLabel.textContent = "QUERYING POLYGON AMOY RPC";
+              if (stepLabel) stepLabel.textContent = `QUERYING ${name} RPC`;
               if (hashStream) hashStream.textContent = "0x892a01ef6b432...syncing contract headers";
             } else if (current >= 65 && current < 95) {
               if (statusText) statusText.textContent = "PARSING CARPASSPORT ABI...";

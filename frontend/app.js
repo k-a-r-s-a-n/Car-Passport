@@ -61,6 +61,7 @@
   function rpcForChain(chainId) {
     const n = Number(chainId);
     if (n === cfg.amoy.chainId) return cfg.amoy.rpcUrl;
+    if (n === cfg.sepolia.chainId) return cfg.sepolia.rpcUrl;
     if (n === cfg.localhost.chainId) return cfg.localhost.rpcUrl;
     return cfg.amoy.rpcUrl;
   }
@@ -216,7 +217,7 @@
         a.target = "_blank";
         a.rel = "noopener noreferrer";
         a.className = "font-bold underline ml-2";
-        a.textContent = "PolygonScan";
+        a.textContent = (chainId === 11155111) ? "Etherscan" : "PolygonScan";
         el.appendChild(a);
       } else {
         const span = document.createElement("span");
@@ -257,6 +258,21 @@
               nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
               rpcUrls: [cfg.amoy.rpcUrl],
               blockExplorerUrls: [cfg.amoy.explorer],
+            },
+          ],
+        });
+        return;
+      }
+      if (switchErr.code === 4902 && chainId === cfg.sepolia.chainId) {
+        await global.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [
+            {
+              chainId: cfg.sepolia.hexChainId,
+              chainName: cfg.sepolia.name,
+              nativeCurrency: { name: "Sepolia ETH", symbol: "ETH", decimals: 18 },
+              rpcUrls: [cfg.sepolia.rpcUrl],
+              blockExplorerUrls: [cfg.sepolia.explorer],
             },
           ],
         });

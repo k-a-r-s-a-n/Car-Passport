@@ -51,7 +51,7 @@
     <div id="splash-screen" class="splash-overlay" aria-hidden="true">
       <div class="splash-topbar">
         <div class="splash-meta-tag">[SYS] CARPASSPORT // L2-CORE</div>
-        <div class="splash-meta-node">CHAIN: POLYGON AMOY [80002]</div>
+        <div class="splash-meta-node">CHAIN: INITIALIZING...</div>
         <div class="splash-meta-status">NODE: READY</div>
       </div>
 
@@ -418,7 +418,7 @@
     </main>
 
     <footer class="max-w-6xl mx-auto px-4 py-6 text-center text-xs font-bold border-t-4 border-neo-ink mt-12">
-      CarPassport · Prepared by Karwin S.C & Kevin Fernando · Polygon Amoy Testnet
+      CarPassport · Prepared by Karwin S.C & Kevin Fernando · <span id="footerNetwork">Polygon Amoy Testnet</span>
     </footer>
 
     <!-- Scripts -->
@@ -430,7 +430,13 @@
     <script src="./app.js"></script>
     <script>
       // Initialize Network Badge
+      const { chainId } = window.CarPassportApp.resolveAddressAndChain();
       window.CarPassportApp.paintNetworkBadge(document.getElementById("networkBadge"));
+
+      const footerNet = document.getElementById("footerNetwork");
+      if (footerNet && chainId) {
+        footerNet.textContent = window.CarPassportApp.networkName(chainId);
+      }
 
       // Single-page Tab Switching Logic (GSAP Animated & Directional)
       function switchTab(tabId, btn) {
